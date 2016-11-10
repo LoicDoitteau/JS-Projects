@@ -142,11 +142,23 @@ var Evolution = function(population, mutationRate, target)
 	};
 };
 
+function getUrlParams()
+{	
+	var parts = location.search.substring(1).split('&');
+	var params = [];
+	for (var i = 0; i < parts.length; i++)
+	{
+		var kv = parts[i].split('=');
+		params[kv[0]] = kv[1];
+	}
+	return f;
+}
 
 var population = 150;
 var generations = 3000
 var mutationRate = 0.01;
-var target = "Fab est un gros naze !";
+var target = getUrlParams().value;
+target == null ? "Hello world" : target;
 var interval = 10;
 var evolution = Evolution(population, mutationRate, target);
 var ID = setInterval(function()
