@@ -158,7 +158,7 @@ var population = 150;
 var generations = 3000
 var mutationRate = 0.01;
 var target = getUrlParams().value;
-target == null ? "Hello world" : decodeURI(target);
+target == null ? "Hello world" : decodeURIComponent(target);
 var interval = 10;
 var evolution = Evolution(population, mutationRate, target);
 var ID = setInterval(function()
