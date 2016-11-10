@@ -151,7 +151,7 @@ function getUrlParams()
 		var kv = parts[i].split('=');
 		params[kv[0]] = kv[1];
 	}
-	return f;
+	return params;
 }
 
 var population = 150;
