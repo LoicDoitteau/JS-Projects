@@ -3,7 +3,7 @@ var DNA = function(target, mutationRate)
 	var genesLentgh = target.length;
 	var genes = [];
 	targetGenes = target.split('');
-	var alphabet = "azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN 0123456789+-*/?,;.:!§".split('');
+	var alphabet = "azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN 0123456789+-*/?,;.:!%".split('');
 	for (var i = 0; i < genesLentgh; i++) 
 	{
 		genes[i] = alphabet[Math.floor((Math.random() * alphabet.length))];
