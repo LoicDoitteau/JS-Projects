@@ -9,6 +9,8 @@ Walker.prototype.reset = function()
     this.stack = [this.position];
     this.walked = [];
     var c = {r : random(256), g : random(256), b : random(256)};
+    //colorMode(HSB, 255, 255, 255, 1);
+    //var c = {r : random(256), g : 128, b : 200};
     this.walked[this.position.x + this.position.y * width] = c;
     stroke(color(c.r, c.g, c.b));
     point(this.position.x, this.position.y);
@@ -25,9 +27,16 @@ Walker.prototype.update = function()
             this.stack.push(this.position);
             var fullNeighbors = this.getFullNeighbors(2);
             var c = fullNeighbors.map(n => this.walked[n.x + n.y * width]).reduce((t, c, i) => ({r : t.r + c.r, g : t.g + c.g, b : t.b + c.b}));
-            c.r = c.r / fullNeighbors.length + random(-1, 1);
-            c.g = c.g / fullNeighbors.length + random(-1, 1);
-            c.b = c.b / fullNeighbors.length + random(-1, 1);
+            c.r = constrain(c.r / fullNeighbors.length + random(-5, 5), 0, 255);
+            c.g = constrain(c.g / fullNeighbors.length + random(-5, 5), 0, 255);
+            c.b = constrain(c.b / fullNeighbors.length + random(-5, 5), 0, 255);
+            // c.r = (c.r / fullNeighbors.length + random(-1, 1)) % 256;
+            // if(c.r < 0)
+            // {
+            //     c.r = 255 - c.r;
+            // }
+            // c.g = 128;
+            // c.b = 200;
             this.walked[this.position.x + this.position.y * width] = c; 
             stroke(color(c.r, c.g, c.b));
             point(this.position.x, this.position.y);
