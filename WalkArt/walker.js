@@ -27,9 +27,9 @@ Walker.prototype.update = function()
             this.stack.push(this.position);
             var fullNeighbors = this.getFullNeighbors(2);
             var c = fullNeighbors.map(n => this.walked[n.x + n.y * width]).reduce((t, c, i) => ({r : t.r + c.r, g : t.g + c.g, b : t.b + c.b}));
-            c.r = constrain(c.r / fullNeighbors.length + random(-5, 5), 0, 255);
-            c.g = constrain(c.g / fullNeighbors.length + random(-5, 5), 0, 255);
-            c.b = constrain(c.b / fullNeighbors.length + random(-5, 5), 0, 255);
+            c.r = constrain(c.r / fullNeighbors.length + random(-1, 1), 0, 255);
+            c.g = constrain(c.g / fullNeighbors.length + random(-1, 1), 0, 255);
+            c.b = constrain(c.b / fullNeighbors.length + random(-1, 1), 0, 255);
             // c.r = (c.r / fullNeighbors.length + random(-1, 1)) % 256;
             // if(c.r < 0)
             // {
