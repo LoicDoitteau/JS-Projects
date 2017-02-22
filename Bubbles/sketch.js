@@ -8,6 +8,7 @@ var showQuadtree;
 
 function setup() 
 {
+	createCanvas(600, 600);
 	field = new Field(20);
 	quadtree = new Quadtree(0, new Quad(0, 0, width, height));
 	showField = createCheckbox('Flow field', false);
