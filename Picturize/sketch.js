@@ -7,8 +7,8 @@ var iterations = 20;
 
 function preload()
 {
-	img = loadImage("https://s-media-cache-ak0.pinimg.com/736x/ae/8a/a9/ae8aa90f5d7532b6b691fada3e1a0aa5.jpg");
-	//img = loadImage("pika.jpg");
+	//img = loadImage("https://s-media-cache-ak0.pinimg.com/736x/ae/8a/a9/ae8aa90f5d7532b6b691fada3e1a0aa5.jpg");
+	img = loadImage("pika.jpg");
 }
 
 function setup()
