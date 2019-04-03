@@ -155,7 +155,7 @@ function checkEdges() {
                     const c2 = a2 * p2.x + b2 * p2.y
 
                     const det = a1 * b2 - a2 * b1;
-                    // if(det == 0) continue;
+                    if(det == 0) continue;
 
                     const x = (b2 * c1 - b1 * c2) / det;
                     const y = (a1 * c2 - a2 * c1) / det;
