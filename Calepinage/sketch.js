@@ -118,7 +118,7 @@ function drawUI() {
 
 // https://www.quora.com/How-do-I-know-if-any-two-given-polygons-intersect-overlap
 function checkIntersections() {
-    return checkBoundingBoxes() && checkEdges() && checkPoints();
+    return checkBoundingBoxes() && (checkEdges() || checkPoints());
 }
 
 function checkBoundingBoxes() {
