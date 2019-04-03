@@ -62,12 +62,9 @@ function updateShape() {
         selectedPoint.y = mouseY;
     }
     if(keyIsPressed && keyCode == 32 && hoveredPoint) {
-        let p = {x : hoveredPoint.next.x + dist(hoveredPoint, hoveredPoint.next), y : hoveredPoint.next.y}
-
-        const a = hoveredPoint.y <= hoveredPoint.next.y ? Math.PI * 2 - angle(hoveredPoint, p, hoveredPoint.next) : angle(hoveredPoint, p, hoveredPoint.next);
-        p = rot(hoveredPoint.next, 100, a);
-        hoveredPoint.x = p.x;
-        hoveredPoint.y = p.y;
+        const t = 100 / dist(hoveredPoint, hoveredPoint.next);
+        hoveredPoint.x = hoveredPoint.x * t + hoveredPoint.next.x * (1 - t);
+        hoveredPoint.y = hoveredPoint.y * t + hoveredPoint.next.y * (1 - t);
     }
 }
 
