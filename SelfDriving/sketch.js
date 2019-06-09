@@ -51,7 +51,7 @@ function draw() {
 
     const best = cars.sort((c1, c2) => c2.fitness - c1.fitness).find(c => c);
     best.highlight();
-    track.checkPoints[best.index].show()
+    // track.checkPoints[best.index].show()
 
     if(cars.every(c => c.dead) || best.fitness >= CHECK_POINTS_COUNT * 3)
     {
