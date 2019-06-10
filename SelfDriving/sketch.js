@@ -38,6 +38,18 @@ function draw() {
 
     track.show();
 
+    if (keyIsDown(UP_ARROW)) {
+        player.accelerate(1);
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+        player.brake(1);
+    }
+    if (keyIsDown(LEFT_ARROW)) {
+        player.rotate(-1);
+    } else if (keyIsDown(RIGHT_ARROW)) {
+        player.rotate(1);
+    }
+
     for (const car of cars) {
         if(!car.dead)
         {
@@ -50,8 +62,9 @@ function draw() {
     }
 
     const best = cars.sort((c1, c2) => c2.fitness - c1.fitness).find(c => c);
-    best.highlight();
-    // track.checkPoints[best.index].show()
+    
+    player.update();
+    player.highlight();
 
     if(cars.every(c => c.dead) || best.fitness >= CHECK_POINTS_COUNT * 3)
     {
@@ -66,6 +79,8 @@ function draw() {
             newCars.push(car);
         }
         cars = newCars;
+
+        player = new Car(pos.copy(), angle);
     }
 }
 
