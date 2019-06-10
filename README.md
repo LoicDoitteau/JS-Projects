@@ -11,5 +11,5 @@ https://loicdoitteau.github.io/JS-Projects/WalkArt
 Picturize
 https://loicdoitteau.github.io/JS-Projects/Picturize
 
-Self driving cars a basic neural network and genetic algorithm
+Self driving cars with a basic neural network and genetic algorithm
 https://loicdoitteau.github.io/JS-Projects/SelfDriving
