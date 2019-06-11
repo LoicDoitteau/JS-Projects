@@ -18,7 +18,7 @@ function Car(pos, angle) {
     );
 }
 
-Car.prototype.draw = function() {
+Car.prototype.show = function() {
     push();
     translate(this.pos.x, this.pos.y);
     rotate(this.dir.heading());

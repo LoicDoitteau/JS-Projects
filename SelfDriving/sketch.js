@@ -8,7 +8,8 @@ let cars = [];
 let player = null;
 var track = null;
 var generation = 1;
-var saveButton, loadButton;
+var showBestOnly = false;
+var saveButton, loadButton, checkbox;
 
 function setup() {
     createCanvas(800, 800);
@@ -27,6 +28,8 @@ function setup() {
     saveButton.mousePressed(saveDada);
     loadButton = createButton("Load");
     loadButton.mousePressed(loadData);
+    checkbox = createCheckbox("Best only", false);
+    checkbox.changed(checkboxChanged)
 }
 
 function draw() {
@@ -58,11 +61,12 @@ function draw() {
             car.check(track.checkPoints);
             car.look(track.walls);
         }
-        car.draw();
+        if(!showBestOnly) car.show();
     }
 
     const best = cars.sort((c1, c2) => c2.fitness - c1.fitness).find(c => c);
-    
+    if(showBestOnly) best.show();
+
     player.update();
     player.highlight();
 
@@ -106,3 +110,7 @@ function loadData() {
         }
     })
 }
+
+function checkboxChanged() {
+    showBestOnly = this.checked();
+} 
