@@ -16,7 +16,7 @@ let palette = null;
 let img = null;
 
 function preload() {
-  img = loadImage("noctali.jpg");
+  img = loadImage("eevee1.png");
 }
 
 function setup() {
@@ -197,21 +197,21 @@ function diffuseError(img, error, x, y, scale) {
 //   3,  1
 // ];
 
-// const MAT_LENGTH = 4;
-// const matrix = [
-//   0,  8,  2,  10,
-//   12, 4,  14, 6,
-//   3,  11, 1,  9,
-//   15, 7,  13, 5
-// ];
-const MAT_LENGTH = 5;
+const MAT_LENGTH = 4;
 const matrix = [
-  32,  16,  8,  16,  32,
-  16,  8,   4,  8,   16,
-  8,   4,   0,  4,   8,
-  16,  8,   4,  8,   16,
-  32,  16,  8,  16,  32
+  0,  8,  2,  10,
+  12, 4,  14, 6,
+  3,  11, 1,  9,
+  15, 7,  13, 5
 ];
+// const MAT_LENGTH = 5;
+// const matrix = [
+//   32,  16,  8,  16,  32,
+//   16,  8,   4,  8,   16,
+//   8,   4,   0,  4,   8,
+//   16,  8,   4,  8,   16,
+//   32,  16,  8,  16,  32
+// ];
 
 function method5() {
   const newImg = createImage(img.width, img.height);
