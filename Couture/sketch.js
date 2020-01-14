@@ -40,6 +40,7 @@ const METHODS = {
   error_diffuse_2 : method4,
   pattern_cross_1 : method5,
   pattern_cross_2 : method6,
+  pattern_newspaper_2 : method7,
 }
 
 let grid = null;
@@ -48,8 +49,8 @@ let img = null;
 let slider;
 
 function preload() {
-  img = loadImage("eevee1.png");
-  // img = loadImage("noctali.jpg");
+  img = loadImage("tintin.png");
+  // img = loadImage("eevee2.jpg");
 }
 
 function setup() {
@@ -226,27 +227,6 @@ function diffuseError(img, error, x, y, scale) {
 //#endregion
 
 //#region Ordered Dithering
-// const MAT_LENGTH = 2;
-// const matrix = [
-//   0,  2,
-//   3,  1
-// ];
-
-
-// const MAT_LENGTH = 5;
-// const matrix = [
-//   32,  16,  8,  16,  32,
-//   16,  8,   4,  8,   16,
-//   8,   4,   0,  4,   8,
-//   16,  8,   4,  8,   16,
-//   32,  16,  8,  16,  32
-// ];
-// const matrix = [
-//   0,  8,  2,  10,
-//   12, 4,  14, 6,
-//   3,  11, 1,  9,
-//   15, 7,  13, 5
-// ];
 
 function method5() {
   const MAT_LENGTH = 8;
@@ -326,4 +306,61 @@ function method6() {
   palette.show();
 }
 
+function method7() {
+  // const MAT_LENGTH = 9;
+  // const matrix = [
+  //   0,	7,	12,	15,	16,	15,	12,	7,	0,	
+  //   7,	14,	19,	22,	23,	22,	19,	14,	7,	
+  //   12,	19,	24,	27,	28,	27,	24,	19,	12,	
+  //   15,	22,	27,	30,	31,	30,	27,	22,	15,	
+  //   16,	23,	28,	31,	32,	31,	28,	23,	16,	
+  //   15,	22,	27,	30,	31,	30,	27,	22,	15,	
+  //   12,	19,	24,	27,	28,	27,	24,	19,	12,	
+  //   7,	14,	19,	22,	23,	22,	19,	14,	7,	
+  //   0,	7,	12,	15,	16,	15,	12,	7,	0	
+  // ];
+  const MAT_LENGTH = 7;
+  const matrix = [
+    0,	5,	8,	9,	8,	5,	0,	
+    5,	10,	13,	14,	13,	10,	5,	
+    8,	13,	16,	17,	16,	13,	8,	
+    9,	14,	17,	18,	17,	14,	9,	
+    8,	13,	16,	17,	16,	13,	8,	
+    5,	10,	13,	14,	13,	10,	5,	
+    0,	5,	8,	9,	8,	5,	0,	
+  ];
+  // const MAT_LENGTH = 6;
+  // const matrix = [
+  //   4,	8,	16,	8,	4,	0,
+  //   8,	16,	8,	4,	0,	4,
+  //   16,	8,	4,	0,	4,	8,
+  //   8,	4,	0,	4,	8,	16,
+  //   4,	0,	4,	8,	16,	8,
+  //   0,	4,	8,	16,	8,	4
+  // ];
+  const newImg = createImage(img.width, img.height);
+  img.loadPixels();
+  newImg.loadPixels();
+  for (let x = 0; x <= newImg.width; x++) {
+    for (let y = 0; y <= newImg.height; y++) {
+      const index = (x + y * newImg.width) * 4;
+      const dx = x % MAT_LENGTH;
+      const dy = y % MAT_LENGTH;
+      const treshold = 128 * slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 32 - 0.5);
+      const r = img.pixels[index] + treshold;
+      const g = img.pixels[index + 1] + treshold;
+      const b = img.pixels[index + 2] + treshold;
+
+      const closest = palette.findClosest({r, g, b});
+      
+      newImg.pixels[index] = closest.r;
+      newImg.pixels[index + 1] = closest.g;
+      newImg.pixels[index + 2] = closest.b;
+      newImg.pixels[index + 3] = 255;
+    }
+  }
+  newImg.updatePixels();
+  image(newImg, 0, 0);
+  palette.show();
+}
 //#endregion
