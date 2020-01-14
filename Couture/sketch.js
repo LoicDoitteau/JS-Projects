@@ -1,22 +1,55 @@
 const CELL_WIDTH = 20;
 const CELL_HEIGHT = 20;
-const COLORS = [
-  new Color(255, 0, 0),
-  new Color(255, 255, 0),
-  new Color(0, 255, 0),
-  new Color(0, 255, 255),
-  new Color(0, 0, 255),
-  new Color(255, 0, 255),
-  new Color(),
-  new Color(255, 255, 255)
-];
+// const COLORS = [
+//   new Color(255, 0, 0),
+//   // new Color(255, 255, 0),
+//   new Color(0, 255, 0),
+//   // new Color(0, 255, 255),
+//   new Color(0, 0, 255),
+//   // new Color(255, 0, 255),
+//   new Color(),
+//   new Color(255, 255, 255)
+// ];
+
+const COLORS = getColors(0, 255);
+
+function getColors(...values) {
+  const colors = [];
+  const rec = cur => {
+    if(cur.length == 3) {
+      colors.push(new Color(...cur));
+      return;
+    }
+    for (const value of values) {
+      const newCur = cur.slice();
+      newCur.push(value);
+      rec(newCur);
+    }
+  };
+
+  rec([]);
+
+  return colors;
+}
+
+const METHODS = {
+  revert : revert,
+  treshold_1 : method1,
+  treshold_2 : method2,
+  error_diffuse_1 : method3,
+  error_diffuse_2 : method4,
+  pattern_cross_1 : method5,
+  pattern_cross_2 : method6,
+}
 
 let grid = null;
 let palette = null;
 let img = null;
+let slider;
 
 function preload() {
   img = loadImage("eevee1.png");
+  // img = loadImage("noctali.jpg");
 }
 
 function setup() {
@@ -26,22 +59,24 @@ function setup() {
   palette = new Palette(...COLORS);
   image(img, 0, 0);
 
-  createButton('revert').mousePressed(revert);
-  createButton('method 1').mousePressed(method1);
-  createButton('method 2').mousePressed(method2);
-  createButton('method 3').mousePressed(method3);
-  createButton('method 4').mousePressed(method4);
-  createButton('method 5').mousePressed(method5);
-  createButton('method 6').mousePressed(method6);
+  for (const method in METHODS) {
+    const callback = METHODS[method];
+    createButton(method).mousePressed(callback);
+  }
+
+  slider = createSlider(0, 2, 1, 0.1);
 
   palette.show();
 }
 
-// function draw() {
-//   background(240, 220, 200);
-//   grid.show();
-//   grid.highlight(mouseX, mouseY);
-// }
+function draw() {
+  // background(240, 220, 200);
+  // grid.show();
+  // grid.highlight(mouseX, mouseY);
+  // if(random() < 0.5) method4();
+  // else method3();
+  // console.log(frameRate());
+}
 
 function revert() {
   image(img, 0, 0);
@@ -184,9 +219,9 @@ function method4() {
 function diffuseError(img, error, x, y, scale) {
   if (x < 0 || x >= img.width || y < 0 || y >= img.height) return;
   const index = (x + y * img.width) * 4;
-  img.pixels[index] += error.r * scale;
-  img.pixels[index + 1] += error.g * scale;
-  img.pixels[index + 2] += error.b * scale;
+  img.pixels[index] += error.r * scale * slider.value();
+  img.pixels[index + 1] += error.g * scale * slider.value();
+  img.pixels[index + 2] += error.b * scale * slider.value();
 }
 //#endregion
 
@@ -197,13 +232,7 @@ function diffuseError(img, error, x, y, scale) {
 //   3,  1
 // ];
 
-const MAT_LENGTH = 4;
-const matrix = [
-  0,  8,  2,  10,
-  12, 4,  14, 6,
-  3,  11, 1,  9,
-  15, 7,  13, 5
-];
+
 // const MAT_LENGTH = 5;
 // const matrix = [
 //   32,  16,  8,  16,  32,
@@ -212,8 +241,25 @@ const matrix = [
 //   16,  8,   4,  8,   16,
 //   32,  16,  8,  16,  32
 // ];
+// const matrix = [
+//   0,  8,  2,  10,
+//   12, 4,  14, 6,
+//   3,  11, 1,  9,
+//   15, 7,  13, 5
+// ];
 
 function method5() {
+  const MAT_LENGTH = 8;
+  const matrix = [
+    0,  48, 12, 60, 3,  51, 15, 63,
+    32, 16, 44, 28, 35, 19, 47, 31,
+    8,  56, 4,  52, 11, 59, 7,  55,
+    40, 24, 36, 20, 43, 27, 39, 23,
+    2,  50, 14, 62, 1,  49, 13, 61,
+    34, 18, 46, 30, 33, 17, 45, 29,
+    10, 58, 6,  54, 9,  57, 5,  53,
+    42, 26, 38, 22, 41, 25, 37, 21
+  ];
   const newImg = createImage(img.width, img.height);
   img.loadPixels();
   newImg.loadPixels();
@@ -222,7 +268,7 @@ function method5() {
       const index = (x + y * newImg.width) * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 255 * 0.75 * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
+      const treshold = 255 * slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
       const r = img.pixels[index] + treshold;
       const g = img.pixels[index + 1] + treshold;
       const b = img.pixels[index + 2] + treshold;
@@ -241,6 +287,17 @@ function method5() {
 }
 
 function method6() {
+  const MAT_LENGTH = 8;
+  const matrix = [
+    0,  48, 12, 60, 3,  51, 15, 63,
+    32, 16, 44, 28, 35, 19, 47, 31,
+    8,  56, 4,  52, 11, 59, 7,  55,
+    40, 24, 36, 20, 43, 27, 39, 23,
+    2,  50, 14, 62, 1,  49, 13, 61,
+    34, 18, 46, 30, 33, 17, 45, 29,
+    10, 58, 6,  54, 9,  57, 5,  53,
+    42, 26, 38, 22, 41, 25, 37, 21
+  ];
   const newImg = createImage(img.width, img.height);
   img.loadPixels();
   newImg.loadPixels();
@@ -249,7 +306,7 @@ function method6() {
       for(let dx = 0; dx < MAT_LENGTH; dx++) {
         for(let dy = 0; dy < MAT_LENGTH; dy++) {
           const index = (x + dx + (y + dy) * newImg.width) * 4;
-          const treshold = 255 * 0.75 * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
+          const treshold = 255 * slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
           const r = img.pixels[index] + treshold;
           const g = img.pixels[index + 1] + treshold;
           const b = img.pixels[index + 2] + treshold;

@@ -38,7 +38,7 @@ Palette.prototype.show = function() {
     for (let i = 0; i < this.colors.length; i++) {
         const color = this.colors[i];
         fill(color.r, color.g, color.b);
-        rect(i * 20, 0, 20, 20);
+        rect(i * width / this.colors.length, 0, width / this.colors.length, 20);
     }
     pop();
 }
