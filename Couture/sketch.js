@@ -71,10 +71,10 @@ let canvas = null;
 let slider;
 
 function preload() {
-  // img = loadImage("images/eevee2.png");
+  img = loadImage("images/cat.jpg");
   // img = loadImage("images/typhlo.jpg");
   // img = loadImage("images/noctali2.jpg");
-  img = loadImage("images/charizard.png");
+  // img = loadImage("images/wheel.jpg");
 }
 
 function setup() {
@@ -251,6 +251,7 @@ function method5() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -258,10 +259,10 @@ function method5() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 255 * slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosest(current);
@@ -285,6 +286,7 @@ function method6() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -292,10 +294,11 @@ function method6() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 255 * slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH] + 1) / (MAT_LENGTH * MAT_LENGTH) - 0.5);
+      
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosestVision(current);
@@ -317,6 +320,7 @@ function method7() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -324,10 +328,10 @@ function method7() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 128 * slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 16 - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 16 - 0.5);
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosest(current);
@@ -349,6 +353,7 @@ function method8() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -356,10 +361,10 @@ function method8() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 128 * slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 16 - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 16 - 0.5);
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosestVision(current);
@@ -394,6 +399,7 @@ function method9() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -401,10 +407,10 @@ function method9() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 128 * slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 18 - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 18 - 0.5);
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosest(current);
@@ -439,6 +445,7 @@ function method10() {
   ];
 
   img.loadPixels();
+  const deviation = palette.deviation();
 
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
@@ -446,10 +453,10 @@ function method10() {
       const imgIndex = cellIndex * 4;
       const dx = x % MAT_LENGTH;
       const dy = y % MAT_LENGTH;
-      const treshold = 128 * slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 18 - 0.5);
-      const r = img.pixels[imgIndex] + treshold;
-      const g = img.pixels[imgIndex + 1] + treshold;
-      const b = img.pixels[imgIndex + 2] + treshold;
+      const treshold = slider.value() * ((matrix[dx + dy * MAT_LENGTH]) / 18 - 0.5);
+      const r = img.pixels[imgIndex] + treshold * deviation.r;
+      const g = img.pixels[imgIndex + 1] + treshold * deviation.g;
+      const b = img.pixels[imgIndex + 2] + treshold * deviation.b;
 
       const current = new Color(r, g, b);
       const closest = palette.findClosestVision(current);
