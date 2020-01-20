@@ -1,22 +1,18 @@
-function Grid(cellWidth, cellHeight) {
-    this.cellWidth = cellWidth;
-    this.cellHeight = cellHeight;
+function Grid(canvas, rows, cols, cellSize) {
+    this.canvas = canvas;
+    this.rows = rows;
+    this.cols = cols;
+    this.cellSize = cellSize;
+    this.cells = Array.from({length : rows * cols}, (_, i) => new Cell(canvas, createVector(i %  rows, Math.floor(i / rows)), cellSize, new Color(240, 220, 200)));
 }
 
 Grid.prototype.show = function() {
-    stroke(52, 30, 48);
-    fill(240, 220, 200);
-    for(let x = 0; x < width; x += this.cellWidth) {
-        for(let y = 0; y < height; y += this.cellHeight) {
-            rect(x, y, this.cellWidth, this.cellHeight);
-        }
+    for (const cell of this.cells) {
+        cell.show();
     }
 }
 
 Grid.prototype.highlight = function(x, y) {
-    stroke(52, 30, 48);
-    fill(240, 220, 200);
-    const posX = x - x % this.cellWidth;
-    const posY = y - y % this.cellWidth;
-    rect(posX - this.cellWidth / 2, posY - this.cellHeight / 2, this.cellWidth * 2, this.cellHeight * 2);
+    const cell = this.cells.find(c => c.position.x == x && c.position.y == y);
+    if(cell) cell.highlight();
 }

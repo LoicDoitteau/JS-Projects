@@ -42,3 +42,14 @@ Palette.prototype.show = function() {
     }
     pop();
 }
+
+Palette.prototype.variance = function() {
+    const sum = {r : 0, g : 0, b : 0}
+    for (let i = 0; i < this.colors.length; i++) {
+        const color = this.colors[i];
+        sum.r += color.r;
+        sum.g += color.g;
+        sum.b += color.b;
+    }
+    return {r : sum.r / this.colors.length, g : sum.g / this.colors.length, b : sum.b / this.colors.length};
+}
