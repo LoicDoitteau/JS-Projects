@@ -18,7 +18,7 @@
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
-            "file": "${workspaceFolder}/Couture/index.html"
+            "file": "${workspaceFolder}/Test_Shader/index.html"
         }
     ]
 }
