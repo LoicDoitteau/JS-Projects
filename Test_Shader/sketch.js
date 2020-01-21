@@ -4,6 +4,7 @@ let RESOLUTION;
 let img;
 let shd;
 let colorPicker;
+let checkbox;
 
 function preload() {
   img = loadImage("images/cat.jpg");
@@ -13,8 +14,11 @@ function preload() {
 function setup() {
   createCanvas(SIZE, SIZE, WEBGL);
 
+  pixelDensity(1);
+
   colorPicker = createColorPicker(color(255, 228, 202));
   resolutionSlider = createSlider(1, SIZE, 50, 1);
+  checkbox = createCheckbox('show grid', false);
 
   shader(shd);
   noStroke();
@@ -36,6 +40,7 @@ function draw() {
   shd.setUniform('cols', RESOLUTION);
   shd.setUniform('c', [r, g, b]);
   shd.setUniform('text', img);
+  shd.setUniform('show', checkbox.checked());
 
   quad(-1, -1, 1, -1, 1, 1, -1, 1);
 }
