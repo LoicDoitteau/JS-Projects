@@ -43,13 +43,25 @@ Palette.prototype.show = function() {
     pop();
 }
 
-Palette.prototype.variance = function() {
+Palette.prototype.average = function() {
     const sum = {r : 0, g : 0, b : 0}
     for (let i = 0; i < this.colors.length; i++) {
         const color = this.colors[i];
         sum.r += color.r;
         sum.g += color.g;
         sum.b += color.b;
+    }
+    return {r : sum.r / this.colors.length, g : sum.g / this.colors.length, b : sum.b / this.colors.length};
+}
+
+Palette.prototype.deviation = function() {
+    const sum = {r : 0, g : 0, b : 0}
+    const average = this.average();
+    for (let i = 0; i < this.colors.length; i++) {
+        const color = this.colors[i];
+        sum.r += Math.abs(color.r - average.r);
+        sum.g += Math.abs(color.g - average.g);
+        sum.b += Math.abs(color.b - average.b);
     }
     return {r : sum.r / this.colors.length, g : sum.g / this.colors.length, b : sum.b / this.colors.length};
 }
