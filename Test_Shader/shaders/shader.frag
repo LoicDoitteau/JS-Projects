@@ -1,27 +1,29 @@
 precision highp float;
 
-uniform vec2 u_resolution;
-uniform vec3 u_mouse;
-uniform float u_time;
+uniform vec2 uResolution;
+uniform vec3 uMouse;
+uniform float uTime;
 
 uniform int rows;
 uniform int cols;
 uniform vec3 c;
 uniform sampler2D text;
 
-float square(vec2 position, float size)
+vec3 square(vec2 position, vec3 color)
 {
-	vec2 bl = step(vec2(0.01), position);
-	vec2 tr = step(vec2(0.01), 1.0 - position);
-	return bl.x * bl.y * tr.x * tr.y;
+	vec2 bl = step(vec2(0.05), position);			// Bottom left
+	vec2 tr = step(vec2(0.05), 1.0 - position);		// Top right
+	return color * (bl.x * bl.y * tr.x * tr.y);		// Square with black stroke
 }
 
 void main() 
 {
-	vec2 st = gl_FragCoord.st/u_resolution;
-	vec2 pos = fract(st * vec2(cols, -rows));
-	float sqr = square(pos, 0.5);
-	gl_FragColor = vec4(c * sqr, 1.0);
-	// gl_FragColor = texture2D(text, pos) * vec4(c, 1.0);
-	// gl_FragColor = vec4(st, 0.0, 1.0);
+	vec2 uv = gl_FragCoord.st / uResolution;
+	vec2 grid = vec2(cols, rows);
+	vec2 pos = fract(uv * grid);					// Multiply cells count
+	vec2 cell = floor(uv * grid) / grid;			// Current cell coord
+	cell.y = 1.0 - cell.y;							// Flip Y coord
+	vec3 clr = texture2D(text, cell).rgb * c;
+	vec3 sqr = square(pos, clr);
+	gl_FragColor = vec4(sqr, 1.0);
 }
