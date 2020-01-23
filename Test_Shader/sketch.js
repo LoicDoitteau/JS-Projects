@@ -3,6 +3,7 @@
 let camera, scene, renderer;
 let textureLoader;
 let uniforms;
+let colorPicker, resolutionSlider, infoCheckbox;
 
 window.onload = function() {
   init();
@@ -10,20 +11,39 @@ window.onload = function() {
 }
 
 function init() {
-  camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
+  camera = new THREE.OrthographicCamera(- 1, 1, 1, - 1, 0, 1);
   camera.position.z = 1;
 
   scene = new THREE.Scene();
 
   const geometry = new THREE.PlaneBufferGeometry(2, 2);
 
-  uniforms = {
-    u_time: { type: "f", value: 1.0 },
-    u_resolution: { type: "v2", value: new THREE.Vector2(canvas.width, canvas.height) },
-    u_mouse: { type: "v2", value: new THREE.Vector2() }
-  };
+  const canvas = document.getElementById("canvas");
+  const context = canvas.getContext('webgl2', { alpha: false });
+
+  colorPicker = document.getElementById("color");
+  resolutionSlider = document.getElementById("range");
+  infoCheckbox = document.getElementById("checkbox");
 
   textureLoader = new THREE.TextureLoader();
+  const texture = textureLoader.load("images/cat.jpg");
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+
+  const palette = createPalette();
+
+  uniforms = {
+    u_time: { value: 1.0 },
+    u_resolution: { value: new THREE.Vector2(canvas.width, canvas.height) },
+    u_mouse: { value: new THREE.Vector2() },
+    rows: { value: 1 },
+    cols: { value: 1 },
+    color: { value: new THREE.Color() },
+    mainTex: { value: texture },
+    show: { value: false },
+    palette: { value : palette },
+    count: {value : palette.image.width}
+  };
 
   const material = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -34,11 +54,11 @@ function init() {
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
-  renderer = new THREE.WebGLRenderer({ canvas : document.getElementById("canvas") });
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer = new THREE.WebGLRenderer({ canvas, context });
+  renderer.setPixelRatio(1);
+  renderer.setSize(canvas.width, canvas.height);
 
-  // onWindowResize();
-  // window.addEventListener( 'resize', onWindowResize, false );
+  addEventsListeners();
 
   document.onmousemove = function(e) {
     uniforms.u_mouse.value.x = e.pageX
@@ -48,101 +68,80 @@ function init() {
 
 function animate(timestamp) {
   requestAnimationFrame(animate);
-  uniforms.u_time.value + timestamp / 1000;
+  uniforms.u_time.value = timestamp / 1000;
   renderer.render(scene, camera);
 }
 
-function onWindowResize() {
-  renderer.setSize( window.innerWidth, window.innerHeight );
+function addEventsListeners() {
+  // onWindowResized();
+  // window.addEventListener( 'resize', onWindowResized, false );
+
+  onColorPicked();
+  colorPicker.addEventListener("change", onColorPicked);
+
+  onResolutionChanged();
+  resolutionSlider.addEventListener("change", onResolutionChanged);
+
+  onInfoToggled();
+  infoCheckbox.addEventListener("change", onInfoToggled);
 }
 
-// const SIZE = 600;
-// let RESOLUTION;
+function onWindowResized() {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  uniforms.u_resolution.value = new THREE.Vector2(window.innerWidth, window.innerHeight);
+}
 
-// let palette;
-// let img;
-// let shd;
-// let colorPicker;
-// let checkbox;
+function onColorPicked() {
+  const color = colorPicker.value;
+  uniforms.color.value = new THREE.Color(color);
+}
 
-// THREE.
+function onResolutionChanged() {
+  const resolution = resolutionSlider.valueAsNumber;
+  uniforms.rows.value = resolution;
+  uniforms.cols.value = resolution;
+}
 
-// function createPalette() {
-//   const COLORS = [
-//     color(0, 0, 0),
-//     color(255, 55, 55),
-//     color(255, 98, 40),
-//     color(255, 212, 38),
-//     color(100, 182, 20),
-//     color(44, 128, 44),
-//     color(43, 185, 221),
-//     color(43, 154, 174),
-//     color(61, 65, 141),
-//     color(151, 77, 157),
-//     color(103, 51, 31),
-//     color(255, 255, 255),
-//     color(236, 192, 243),
-//     color(202, 115, 175),
-//     color(129, 182, 196),
-//     color(186, 204, 222),
-//     color(152, 211, 173),
-//     color(249, 235, 155),
-//     color(245, 219, 190),
-//     color(241, 176, 160),
-//     color(254, 113, 116),
-//     color(252, 118, 155),
-//     color(255, 187, 202)
-//   ];
-//   const palette = createImage(COLORS.length, 1);
-//   palette.loadPixels();
-//   for (let x = 0; x < COLORS.length; x++) {
-//     const color = COLORS[x];
-//     palette.set(x, 0, color);
-//   }
-//   palette.updatePixels();
-//   return palette;
-// }
+function onInfoToggled() {
+  const showInfos = infoCheckbox.checked;
+  uniforms.show.value = showInfos;
+}
 
-// function preload() {
-//   img = loadImage("images/cat.jpg");
-//   shd = loadShader('shaders/shader.vert', 'shaders/shader.frag');
-// }
+function createPalette() {
+  const colors = [
+    { r: 0, g: 0, b: 0 },
+    { r: 255, g: 55, b: 55 },
+    { r: 255, g: 98, b: 40 },
+    { r: 255, g: 212, b: 38 },
+    { r: 100, g: 182, b: 20 },
+    { r: 44, g: 128, b: 44 },
+    { r: 43, g: 185, b: 221 },
+    { r: 43, g: 154, b: 174 },
+    { r: 61, g: 65, b: 141 },
+    { r: 151, g: 77, b: 157 },
+    { r: 103, g: 51, b: 31 },
+    { r: 255, g: 255, b: 255 },
+    { r: 236, g: 192, b: 243 },
+    { r: 202, g: 115, b: 175 },
+    { r: 129, g: 182, b: 196 },
+    { r: 186, g: 204, b: 222 },
+    { r: 152, g: 211, b: 173 },
+    { r: 249, g: 235, b: 155 },
+    { r: 245, g: 219, b: 190 },
+    { r: 241, g: 176, b: 160 },
+    { r: 254, g: 113, b: 116 },
+    { r: 252, g: 118, b: 155 },
+    { r: 255, g: 187, b: 202 }
+  ];
+  
+  const data = new Uint8Array(3 * colors.length);
+  for (let i = 0; i < colors.length; i++) {
+    const color = colors[i];
+    const index = i * 3;
+    data[index + 0] = color.r;
+    data[index + 1] = color.g;
+    data[index + 2] = color.b;
+  }
 
-// function setup() {
-//   createCanvas(SIZE, SIZE, WEBGL);
-
-//   pixelDensity(1);
-
-//   palette = createPalette();
-//   colorPicker = createColorPicker(color(255, 228, 202));
-//   resolutionSlider = createSlider(1, SIZE, 50, 1);
-//   checkbox = createCheckbox('infos', false);
-
-//   shader(shd);
-
-//   shd.setUniform('texture', img);
-//   shd.setUniform('palette', palette);
-//   shd.setUniform('count', 22);
-
-//   noStroke();
-// }
-
-// function draw() {
-//   const clr = colorPicker.color();
-//   const r = red(clr) / 255;
-//   const g = green(clr) / 255;
-//   const b = blue(clr) / 255;
-
-//   RESOLUTION = resolutionSlider.value();
-
-//   shd.setUniform("uResolution", [width, height]);
-//   shd.setUniform("uMouse", [mouseX, mouseY]);
-//   shd.setUniform("uTime", millis() / 1000.0);
-
-//   shd.setUniform('rows', RESOLUTION);
-//   shd.setUniform('cols', RESOLUTION);
-//   shd.setUniform('color', [r, g, b]);
-//   shd.setUniform('show', checkbox.checked());
-
-//   quad(-1, -1, 1, -1, 1, 1, -1, 1);
-// }
+  return new THREE.DataTexture(data, colors.length, 1, THREE.RGBFormat);
+}
