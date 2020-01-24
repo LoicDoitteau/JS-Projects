@@ -6,7 +6,7 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let colorPicker, resolutionSlider, infoCheckbox;
+let colorPicker, resolutionSlider, biasSlider, infoCheckbox;
 
 window.onload = () => {
   loadShaders(VERTEX_SHADER_URI, FRAGMENT_SHADER_URI, (vs, fs) => {
@@ -40,7 +40,8 @@ function init(vertexShader, fragmentShader) {
   const context = canvas.getContext('webgl2', { alpha: false });
 
   colorPicker = document.getElementById("color");
-  resolutionSlider = document.getElementById("range");
+  resolutionSlider = document.getElementById("res-range");
+  biasSlider = document.getElementById("bias-range");
   infoCheckbox = document.getElementById("checkbox");
 
   const texture = new THREE.TextureLoader().load(IMAGE_URI);
@@ -59,7 +60,8 @@ function init(vertexShader, fragmentShader) {
     mainTex: { value: texture },
     show: { value: false },
     palette: { value : palette },
-    count: {value : palette.image.width}
+    count: {value : palette.image.width},
+    bias: {value : 1.0}
   };
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
@@ -81,6 +83,9 @@ function init(vertexShader, fragmentShader) {
 
 function animate(timestamp) {
   requestAnimationFrame(animate);
+  onColorPicked();
+  onResolutionChanged();
+  onBiasChanged();
   uniforms.u_time.value = timestamp / 1000;
   renderer.render(scene, camera);
 }
@@ -94,6 +99,9 @@ function addEventsListeners() {
 
   onResolutionChanged();
   resolutionSlider.addEventListener("change", onResolutionChanged);
+
+  onBiasChanged();
+  biasSlider.addEventListener("change", onBiasChanged);
 
   onInfoToggled();
   infoCheckbox.addEventListener("change", onInfoToggled);
@@ -113,6 +121,11 @@ function onResolutionChanged() {
   const resolution = resolutionSlider.valueAsNumber;
   uniforms.rows.value = resolution;
   uniforms.cols.value = resolution;
+}
+
+function onBiasChanged() {
+  const bias = biasSlider.valueAsNumber;
+  uniforms.bias.value = bias;
 }
 
 function onInfoToggled() {
