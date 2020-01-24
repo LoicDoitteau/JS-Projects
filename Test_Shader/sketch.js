@@ -1,16 +1,34 @@
 // import * as THREE from "./libraries/three.module";
 
+const VERTEX_SHADER_URI = "shaders/shader.vert";
+const FRAGMENT_SHADER_URI = "shaders/shader.frag";
+const IMAGE_URI = "images/cat.jpg";
+
 let camera, scene, renderer;
-let textureLoader;
 let uniforms;
 let colorPicker, resolutionSlider, infoCheckbox;
 
-window.onload = function() {
-  init();
-  animate();
+window.onload = () => {
+  loadShaders(VERTEX_SHADER_URI, FRAGMENT_SHADER_URI, (vs, fs) => {
+    init(vs, fs);
+    animate();
+  });
 }
 
-function init() {
+function loadShaders(vertexShaderUri, fragmentShaderUri, onLoad) {
+  const manager = new THREE.LoadingManager();
+  const fileLoader = new THREE.FileLoader(manager);
+  let vertexShader, fragmentShader;
+
+  fileLoader.load(vertexShaderUri, data => vertexShader = data);
+  fileLoader.load(fragmentShaderUri, data => fragmentShader = data);
+
+  manager.onLoad = () => {
+    onLoad(vertexShader, fragmentShader);
+  }
+}
+
+function init(vertexShader, fragmentShader) {
   camera = new THREE.OrthographicCamera(- 1, 1, 1, - 1, 0, 1);
   camera.position.z = 1;
 
@@ -25,8 +43,7 @@ function init() {
   resolutionSlider = document.getElementById("range");
   infoCheckbox = document.getElementById("checkbox");
 
-  textureLoader = new THREE.TextureLoader();
-  const texture = textureLoader.load("images/cat.jpg");
+  const texture = new THREE.TextureLoader().load(IMAGE_URI);
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
 
@@ -45,11 +62,7 @@ function init() {
     count: {value : palette.image.width}
   };
 
-  const material = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: document.getElementById("vs").textContent,
-    fragmentShader: document.getElementById("fs").textContent
-  });
+  const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
 
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
@@ -60,7 +73,7 @@ function init() {
 
   addEventsListeners();
 
-  document.onmousemove = function(e) {
+  document.onmousemove = e => {
     uniforms.u_mouse.value.x = e.pageX
     uniforms.u_mouse.value.y = e.pageY
   }
