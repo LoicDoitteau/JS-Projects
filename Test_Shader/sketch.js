@@ -6,7 +6,9 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let colorPicker, resolutionSlider, biasSlider, infoCheckbox;
+let canvas, colorPicker, resolutionSlider, biasSlider, infoCheckbox;
+
+let scale, offset, isMoving, rect, x, y;
 
 window.onload = () => {
   loadShaders(VERTEX_SHADER_URI, FRAGMENT_SHADER_URI, (vs, fs) => {
@@ -36,8 +38,15 @@ function init(vertexShader, fragmentShader) {
 
   const geometry = new THREE.PlaneBufferGeometry(2, 2);
 
-  const canvas = document.getElementById("canvas");
+  canvas = document.getElementById("canvas");
   const context = canvas.getContext('webgl2', { alpha: false });
+
+  scale = 1;
+  offset = new THREE.Vector2(0, 0);
+  isMoving = false;
+  rect = canvas.getBoundingClientRect();
+  x = 0;
+  y = 0;
 
   colorPicker = document.getElementById("color");
   resolutionSlider = document.getElementById("res-range");
@@ -56,12 +65,13 @@ function init(vertexShader, fragmentShader) {
     u_mouse: { value: new THREE.Vector2() },
     rows: { value: 1 },
     cols: { value: 1 },
-    color: { value: new THREE.Color() },
+    mainColor: { value: new THREE.Color() },
     mainTex: { value: texture },
     show: { value: false },
     palette: { value : palette },
-    count: {value : palette.image.width},
-    bias: {value : 1.0}
+    count: { value : palette.image.width },
+    bias: { value : 1.0 },
+    viewPort: { value: new THREE.Vector4(0, 0, canvas.width, canvas.height) }
   };
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
@@ -74,11 +84,6 @@ function init(vertexShader, fragmentShader) {
   renderer.setSize(canvas.width, canvas.height);
 
   addEventsListeners();
-
-  document.onmousemove = e => {
-    uniforms.u_mouse.value.x = e.pageX
-    uniforms.u_mouse.value.y = e.pageY
-  }
 }
 
 function animate(timestamp) {
@@ -88,6 +93,10 @@ function animate(timestamp) {
   onBiasChanged();
   uniforms.u_time.value = timestamp / 1000;
   renderer.render(scene, camera);
+}
+
+function clamp(val, min, max) {
+  return Math.min(Math.max(val, min), max);
 }
 
 function addEventsListeners() {
@@ -105,6 +114,14 @@ function addEventsListeners() {
 
   onInfoToggled();
   infoCheckbox.addEventListener("change", onInfoToggled);
+
+  document.addEventListener("mousemove", onMouseMove);
+  
+  canvas.addEventListener("wheel", onCanvasWheel);
+  canvas.addEventListener("mousedown", onCanvasMouseDown);
+  canvas.addEventListener("mouseup", onCanvasMouseUp);
+  document.addEventListener("mouseout", onCanvasMouseUp);
+  canvas.addEventListener("mousemove", onCanvasMouseMove);
 }
 
 function onWindowResized() {
@@ -114,7 +131,7 @@ function onWindowResized() {
 
 function onColorPicked() {
   const color = colorPicker.value;
-  uniforms.color.value = new THREE.Color(color);
+  uniforms.mainColor.value = new THREE.Color(color);
 }
 
 function onResolutionChanged() {
@@ -131,6 +148,73 @@ function onBiasChanged() {
 function onInfoToggled() {
   const showInfos = infoCheckbox.checked;
   uniforms.show.value = showInfos;
+}
+
+function onMouseMove(e) {
+  uniforms.u_mouse.value.x = e.clientX - rect.left;
+  uniforms.u_mouse.value.y = e.clientY - rect.top;
+}
+
+function onCanvasWheel(e) {
+  e.preventDefault();
+
+  scale += e.deltaY * -0.1;
+  scale = clamp(scale, 1, 20);
+
+  updateViewPort();
+}
+
+function onCanvasMouseDown(e) {
+  x = e.pageX;
+  y = e.pageY;
+  isMoving = true;
+}
+
+function onCanvasMouseUp(e) {
+  if(isMoving) {
+    x = 0;
+    y = 0;
+    isMoving = false;
+  }
+}
+
+function onCanvasMouseMove(e) {
+  if(isMoving) {
+    const newX = e.pageX;
+    const newY = e.pageY;
+    const dx = x - newX;
+    const dy = y - newY;
+
+    offset.x += dx / scale;
+    offset.y -= dy / scale;
+
+    x = newX;
+    y = newY;
+
+    updateViewPort();
+  }
+}
+
+function updateViewPort() {
+  const minX = offset.x + canvas.width / 2 - canvas.width / 2 / scale;
+  const maxX = offset.x + canvas.width / 2 + canvas.width / 2 / scale;
+  const minY = offset.y + canvas.height / 2 - canvas.height / 2 / scale;
+  const maxY = offset.y + canvas.height / 2 + canvas.height / 2 / scale;
+
+  const clampMinX = clamp(minX, 0, canvas.width);
+  const clampMaxX = clamp(maxX, 0, canvas.width);
+  const clampMinY = clamp(minY, 0, canvas.height);
+  const clampMaxY = clamp(maxY, 0, canvas.height);
+
+  const dMinX = clampMinX - minX;
+  const dMaxX = clampMaxX - maxX;
+  const dMinY = clampMinY - minY;
+  const dMaxY = clampMaxY - maxY;
+
+  offset.x += dMinX + dMaxX;
+  offset.y += dMinY + dMaxY;
+
+  uniforms.viewPort.value = new THREE.Vector4(clampMinX + dMaxX, clampMinY + dMaxY, clampMaxX + dMinX, clampMaxY + dMinY);
 }
 
 function createPalette() {

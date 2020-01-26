@@ -4,9 +4,10 @@ uniform vec2 u_resolution;
 uniform vec3 u_mouse;
 uniform float u_time;
 
+uniform vec4 viewPort;
 uniform int rows;
 uniform int cols;
-uniform vec3 color;
+uniform vec3 mainColor;
 uniform sampler2D mainTex;
 uniform sampler2D palette;
 uniform int count;
@@ -24,6 +25,14 @@ const int[] matrix = int[]
     10, 58, 6,  54, 9,  57, 5,  53,
     42, 26, 38, 22, 41, 25, 37, 21
 );
+
+vec2 map(vec2 value, vec2 min1, vec2 max1, vec2 min2, vec2 max2) {
+  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
+
+float map(float value, float min1, float max1, float min2, float max2) {
+  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+}
 
 float squaredDistance(vec3 point1, vec3 point2)
 {
@@ -70,11 +79,12 @@ vec3 square(vec3 color, vec2 position)
 void main() 
 {
 	vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+	vec2 view = map(gl_FragCoord.xy, vec2(0.0), u_resolution, viewPort.xy, viewPort.zw) / u_resolution;
 	vec2 grid = vec2(cols, rows);
-	vec2 pos = fract(uv * grid);					// Multiply cells count
-	vec2 cell = floor(uv * grid) / grid;			// Current cell coord
-	vec3 clr = texture2D(mainTex, cell).rgb * color;
-	ditherize(clr, floor(uv * grid));
+	vec2 pos = fract(view * grid);					// Multiply cells count
+	vec2 cell = floor(view * grid) / grid;			// Current cell coord
+	vec3 clr = texture2D(mainTex, cell).rgb * mainColor;
+	ditherize(clr, floor(view * grid));
 	vec3 sqr = show ? square(clr, pos) : clr;
 	gl_FragColor = vec4(sqr, 1.0);
 
