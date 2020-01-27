@@ -41,39 +41,26 @@ function init(vertexShader, fragmentShader) {
   canvas = document.getElementById("canvas");
   const context = canvas.getContext('webgl2', { alpha: false });
 
-  scale = 1;
-  offset = new THREE.Vector2(0, 0);
-  isMoving = false;
-  rect = canvas.getBoundingClientRect();
-  x = 0;
-  y = 0;
-
   file = document.getElementById("file");
   colorPicker = document.getElementById("color");
   resolutionSlider = document.getElementById("res-range");
   biasSlider = document.getElementById("bias-range");
   infoCheckbox = document.getElementById("checkbox");
 
-  const texture = new THREE.TextureLoader().load(IMAGE_URI);
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-
   uniforms = {
     u_time: { value: 1.0 },
-    u_resolution: { value: new THREE.Vector2(canvas.width, canvas.height) },
+    u_resolution: { value: new THREE.Vector2() },
     u_mouse: { value: new THREE.Vector2() },
     rows: { value: 1 },
     cols: { value: 1 },
     mainColor: { value: new THREE.Color() },
-    mainTex: { value: texture },
+    mainTex: { value: new THREE.Texture() },
     show: { value: false },
     palette: { value : new THREE.Texture() },
     count: { value : 0 },
     bias: { value : 1.0 },
-    viewPort: { value: new THREE.Vector4(0, 0, canvas.width, canvas.height) }
+    viewPort: { value: new THREE.Vector4() }
   };
-
-  setupPalette();
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
 
@@ -82,7 +69,9 @@ function init(vertexShader, fragmentShader) {
 
   renderer = new THREE.WebGLRenderer({ canvas, context });
   renderer.setPixelRatio(1);
-  renderer.setSize(canvas.width, canvas.height);
+
+  loadTexture(IMAGE_URI);
+  setupPalette();
 
   addEventsListeners();
 }
@@ -128,10 +117,7 @@ function addEventsListeners() {
 }
 
 function onFileChanged() {
-  const texture = new THREE.TextureLoader().load(window.URL.createObjectURL(file.files[0]));
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  uniforms.mainTex.value = texture;
+  loadTexture(window.URL.createObjectURL(file.files[0]));
 }
 
 function onWindowResized() {
@@ -289,4 +275,28 @@ function createPalette() {
   }
 
   return new THREE.DataTexture(data, colors.length, 1, THREE.RGBFormat);
+}
+
+function loadTexture(url) {
+  new THREE.TextureLoader().load(url, texture =>{
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+    
+      renderer.setSize(texture.image.width, texture.image.height);
+    
+      uniforms.mainTex.value = texture;
+      uniforms.u_resolution.value =  new THREE.Vector2(canvas.width, canvas.height)
+      uniforms.viewPort.value = new THREE.Vector4(0, 0, canvas.width, canvas.height);
+
+      scale = 1;
+      offset = new THREE.Vector2(0, 0);
+      isMoving = false;
+      rect = canvas.getBoundingClientRect();
+      x = 0;
+      y = 0;
+
+      const resolution = Math.min(canvas.width, canvas.height);
+      resolutionSlider.max = resolution;
+      resolutionSlider.value = resolution;
+  });
 }
