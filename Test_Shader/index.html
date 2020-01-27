@@ -12,7 +12,7 @@
     <canvas class="canvas" id="canvas"></canvas>
     <div class="card">
       <div>
-        <input id="file" type="file" accept="image/png, image/jpeg">
+        <input id="file" type="file" accept="image/*">
       </div>
       <div>
         <label for="color">Main color</label>
@@ -36,6 +36,9 @@
       <div>
         <button onclick="addColorPicker('#000000')">Add color</button>
         <div id="palette"></div>
+      </div>
+      <div>
+        <button onclick="exportImage()">Export</button>
       </div>
     </div>  
   </body>

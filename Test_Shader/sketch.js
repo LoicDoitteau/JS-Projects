@@ -39,7 +39,7 @@ function init(vertexShader, fragmentShader) {
   const geometry = new THREE.PlaneBufferGeometry(2, 2);
 
   canvas = document.getElementById("canvas");
-  const context = canvas.getContext('webgl2', { alpha: false });
+  const context = canvas.getContext('webgl2', { alpha: false, preserveDrawingBuffer: true });
 
   file = document.getElementById("file");
   colorPicker = document.getElementById("color");
@@ -299,4 +299,13 @@ function loadTexture(url) {
       resolutionSlider.max = resolution;
       resolutionSlider.value = resolution;
   });
+}
+
+function exportImage() {
+  var a = document.createElement('a');
+  a.href = canvas.toDataURL();
+  a.download = "output.png";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
