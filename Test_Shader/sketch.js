@@ -6,7 +6,7 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let canvas, colorPicker, resolutionSlider, biasSlider, infoCheckbox;
+let canvas, file, colorPicker, resolutionSlider, biasSlider, infoCheckbox;
 
 let scale, offset, isMoving, rect, x, y;
 
@@ -48,6 +48,7 @@ function init(vertexShader, fragmentShader) {
   x = 0;
   y = 0;
 
+  file = document.getElementById("file");
   colorPicker = document.getElementById("color");
   resolutionSlider = document.getElementById("res-range");
   biasSlider = document.getElementById("bias-range");
@@ -56,8 +57,6 @@ function init(vertexShader, fragmentShader) {
   const texture = new THREE.TextureLoader().load(IMAGE_URI);
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
-
-  const palette = createPalette();
 
   uniforms = {
     u_time: { value: 1.0 },
@@ -68,11 +67,13 @@ function init(vertexShader, fragmentShader) {
     mainColor: { value: new THREE.Color() },
     mainTex: { value: texture },
     show: { value: false },
-    palette: { value : palette },
-    count: { value : palette.image.width },
+    palette: { value : new THREE.Texture() },
+    count: { value : 0 },
     bias: { value : 1.0 },
     viewPort: { value: new THREE.Vector4(0, 0, canvas.width, canvas.height) }
   };
+
+  setupPalette();
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
 
@@ -122,6 +123,15 @@ function addEventsListeners() {
   canvas.addEventListener("mouseup", onCanvasMouseUp);
   document.addEventListener("mouseout", onCanvasMouseUp);
   canvas.addEventListener("mousemove", onCanvasMouseMove);
+
+  file.addEventListener("change", onFileChanged);
+}
+
+function onFileChanged() {
+  const texture = new THREE.TextureLoader().load(window.URL.createObjectURL(file.files[0]));
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  uniforms.mainTex.value = texture;
 }
 
 function onWindowResized() {
@@ -217,40 +227,65 @@ function updateViewPort() {
   uniforms.viewPort.value = new THREE.Vector4(clampMinX + dMaxX, clampMinY + dMaxY, clampMaxX + dMinX, clampMaxY + dMinY);
 }
 
-function createPalette() {
+function addColorPicker(value) {
+  const element = document.getElementById("palette");
+  const colorPicker = document.createElement("input");
+  colorPicker.type = "color";
+  colorPicker.value = value;
+  colorPicker.addEventListener("input", onPaletteChanged);
+  element.appendChild(colorPicker);
+  onPaletteChanged();
+}
+
+function onPaletteChanged() {
+  const palette = createPalette();
+  uniforms.palette.value = palette;
+  uniforms.count.value = palette.image.width;
+}
+
+function setupPalette() {
   const colors = [
-    { r: 0, g: 0, b: 0 },
-    { r: 255, g: 55, b: 55 },
-    { r: 255, g: 98, b: 40 },
-    { r: 255, g: 212, b: 38 },
-    { r: 100, g: 182, b: 20 },
-    { r: 44, g: 128, b: 44 },
-    { r: 43, g: 185, b: 221 },
-    { r: 43, g: 154, b: 174 },
-    { r: 61, g: 65, b: 141 },
-    { r: 151, g: 77, b: 157 },
-    { r: 103, g: 51, b: 31 },
-    { r: 255, g: 255, b: 255 },
-    { r: 236, g: 192, b: 243 },
-    { r: 202, g: 115, b: 175 },
-    { r: 129, g: 182, b: 196 },
-    { r: 186, g: 204, b: 222 },
-    { r: 152, g: 211, b: 173 },
-    { r: 249, g: 235, b: 155 },
-    { r: 245, g: 219, b: 190 },
-    { r: 241, g: 176, b: 160 },
-    { r: 254, g: 113, b: 116 },
-    { r: 252, g: 118, b: 155 },
-    { r: 255, g: 187, b: 202 }
+    "#000000",
+    "#FF3737",
+    "#FF6228",
+    "#FFD426",
+    "#64B614",
+    "#2C802C",
+    "#2BB9DD",
+    "#2B9AAE",
+    "#3D418D",
+    "#974D9D",
+    "#67331F",
+    "#FFFFFF",
+    "#ECC0F3",
+    "#CA73AF",
+    "#81B6C4",
+    "#BACCDE",
+    "#98D3AD",
+    "#F9EB9B",
+    "#F5DBBE",
+    "#F1B0A0",
+    "#FE7174",
+    "#FC769B",
+    "#FFBBCA"
   ];
+
+  for (let i = 0; i < colors.length; i++) {
+    const color = colors[i];
+    addColorPicker(color);
+  }
+}
+
+function createPalette() {
+  const colors = document.querySelectorAll("#palette input[type=color]");
   
   const data = new Uint8Array(3 * colors.length);
   for (let i = 0; i < colors.length; i++) {
-    const color = colors[i];
+    const color = new THREE.Color(colors[i].value);
     const index = i * 3;
-    data[index + 0] = color.r;
-    data[index + 1] = color.g;
-    data[index + 2] = color.b;
+    data[index + 0] = color.r * 255;
+    data[index + 1] = color.g * 255;
+    data[index + 2] = color.b * 255;
   }
 
   return new THREE.DataTexture(data, colors.length, 1, THREE.RGBFormat);

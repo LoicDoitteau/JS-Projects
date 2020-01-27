@@ -34,6 +34,11 @@ float map(float value, float min1, float max1, float min2, float max2) {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
+float luminance(vec3 color)
+{
+	return color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+}
+
 float squaredDistance(vec3 point1, vec3 point2)
 {
 	vec3 distanceVector = point2 - point1;
@@ -70,10 +75,11 @@ void ditherize(inout vec3 color, vec2 position)
 
 vec3 square(vec3 color, vec2 position)
 {
-	vec2 bl = step(vec2(0.1), position);							// Bottom left
-	vec2 tr = step(vec2(0.1), 1.0 - position);						// Top right
-	float f = 1.0 - ((1.0 - (bl.x * bl.y * tr.x * tr.y)) * 0.1);	// Square with darker stroke
-	return color * f;
+	vec2 bl = step(vec2(0.05), position);							// Bottom left
+	vec2 tr = step(vec2(0.05), 1.0 - position);						// Top right
+	float t = bl.x * bl.y * tr.x * tr.y;
+	float coef = luminance(color) > 0.5 ? -1.0 : 1.0;
+	return mix(color + vec3(1.0) * 0.4 * coef, color, t);
 }
 
 void main() 

@@ -1,32 +1,14 @@
-body {
-	margin: 0;
-	color: #fff;
-	font-family: Monospace;
-	font-size: 13px;
-	line-height: 24px;
-	overscroll-behavior: none;
+.card {
+	float: left;
+	max-width: 300px;
+	border: 3px solid rgb(33, 173, 161);
+	padding: 10px;
+	margin: 10px;
 }
-
-a {
-	color: #ff0;
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-button {
-	cursor: pointer;
-	text-transform: uppercase;
-}
-
-canvas {
-	display: ce;
-	vertical-align: middle;
-	margin: 1em;
-}
-
-a, button, input, select {
-	pointer-events: auto;
+.canvas {
+	float: left;
+	max-width: auto;
+	border: 3px solid rgb(33, 173, 161);
+	padding: 10px;
+	margin: 10px;
 }
