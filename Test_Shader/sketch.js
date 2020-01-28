@@ -6,7 +6,7 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let canvas, file, colorPicker, resolutionSlider, biasSlider, infoCheckbox;
+let canvas, file, colorPicker, resolutionSliderX, resolutionSliderY, biasSlider, infoCheckbox, sizeLabel;
 
 let scale, offset, isMoving, rect, x, y;
 
@@ -43,9 +43,11 @@ function init(vertexShader, fragmentShader) {
 
   file = document.getElementById("file");
   colorPicker = document.getElementById("color");
-  resolutionSlider = document.getElementById("res-range");
+  resolutionSliderX = document.getElementById("res-range-x");
+  resolutionSliderY = document.getElementById("res-range-y")
   biasSlider = document.getElementById("bias-range");
   infoCheckbox = document.getElementById("checkbox");
+  sizeLabel = document.getElementById("size");
 
   uniforms = {
     u_time: { value: 1.0 },
@@ -97,7 +99,8 @@ function addEventsListeners() {
   colorPicker.addEventListener("change", onColorPicked);
 
   onResolutionChanged();
-  resolutionSlider.addEventListener("change", onResolutionChanged);
+  resolutionSliderX.addEventListener("change", onResolutionChanged);
+  resolutionSliderY.addEventListener("change", onResolutionChanged);
 
   onBiasChanged();
   biasSlider.addEventListener("change", onBiasChanged);
@@ -131,14 +134,15 @@ function onColorPicked() {
 }
 
 function onResolutionChanged() {
-  const resolution = resolutionSlider.valueAsNumber;
-  uniforms.rows.value = resolution;
-  uniforms.cols.value = resolution;
+  const resolutionX = resolutionSliderX.valueAsNumber;
+  const resolutionY = resolutionSliderY.valueAsNumber;
+  uniforms.cols.value = resolutionX;
+  uniforms.rows.value = resolutionY;
 }
 
 function onBiasChanged() {
   const bias = biasSlider.valueAsNumber;
-  uniforms.bias.value = bias;
+  uniforms.bias.value = bias / 100;
 }
 
 function onInfoToggled() {
@@ -277,12 +281,22 @@ function createPalette() {
   return new THREE.DataTexture(data, colors.length, 1, THREE.RGBFormat);
 }
 
+function resetPalette() {
+  const colors = document.querySelectorAll("#palette input[type=color]");
+  for (const color of colors) {
+    color.remove();
+  }
+  addColorPicker("#000000");
+  addColorPicker("#FFFFFF");
+}
+
 function loadTexture(url) {
   new THREE.TextureLoader().load(url, texture =>{
       texture.magFilter = THREE.NearestFilter;
       texture.minFilter = THREE.NearestFilter;
     
       renderer.setSize(texture.image.width, texture.image.height);
+      sizeLabel.innerText = `${texture.image.width} x ${texture.image.height}`;
     
       uniforms.mainTex.value = texture;
       uniforms.u_resolution.value =  new THREE.Vector2(canvas.width, canvas.height)
@@ -295,9 +309,10 @@ function loadTexture(url) {
       x = 0;
       y = 0;
 
-      const resolution = Math.min(canvas.width, canvas.height);
-      resolutionSlider.max = resolution;
-      resolutionSlider.value = resolution;
+      resolutionSliderX.max = canvas.width;
+      resolutionSliderX.value = canvas.width;
+      resolutionSliderY.max = canvas.height;
+      resolutionSliderY.value = canvas.height;
   });
 }
 
