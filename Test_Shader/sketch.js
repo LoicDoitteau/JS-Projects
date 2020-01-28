@@ -40,6 +40,7 @@ function init(vertexShader, fragmentShader) {
 
   canvas = document.getElementById("canvas");
   const context = canvas.getContext('webgl2', { alpha: false, preserveDrawingBuffer: true });
+  rect = canvas.getBoundingClientRect();
 
   file = document.getElementById("file");
   colorPicker = document.getElementById("color");
