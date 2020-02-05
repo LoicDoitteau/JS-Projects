@@ -1,0 +1,18 @@
+.card {
+	float: left;
+	max-width: 300px;
+	border: 3px solid rgb(33, 173, 161);
+	padding: 10px;
+	margin: 10px;
+}
+.canvas {
+	float: left;
+	max-width: auto;
+	border: 3px solid rgb(33, 173, 161);
+	padding: 10px;
+	margin: 10px;
+}
+
+input[type=number] {
+	width: 50px;
+}

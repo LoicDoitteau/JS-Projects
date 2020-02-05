@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <title>Shader</title>
+    <script src="libraries/three.min.js"></script>
+    <script src="sketch.js"></script>
+  </head>
+  <body>
+    <canvas class="canvas" id="canvas"></canvas>
+    <div class="card">
+      <div>
+        <input id="file" type="file" accept="image/*">
+      </div>
+      <div>
+        <label id="size"></label>
+      </div>
+      <div>
+        <label for="color">Main color</label>
+        <input id="color" type="color" value="#00FF00">
+      </div>
+      <div>   
+        <button onclick="exportImage()">Export</button>
+      </div>
+    </div>  
+  </body>
+</html>

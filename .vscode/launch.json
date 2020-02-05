@@ -18,7 +18,7 @@
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
-            "file": "${workspaceFolder}/Test_Shader/index.html"
+            "file": "${workspaceFolder}/Matrix_Shader/index.html"
         }
     ]
 }
