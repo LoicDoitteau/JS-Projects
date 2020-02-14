@@ -13,6 +13,11 @@ uniform sampler2D palette;
 uniform int count;
 uniform bool show;
 uniform float bias;
+uniform int filterSize;
+uniform float offset;
+uniform float gamma;
+uniform float treshold;
+uniform float shades;
 
 const int[] matrix = int[]
 (
@@ -26,19 +31,71 @@ const int[] matrix = int[]
     42, 26, 38, 22, 41, 25, 37, 21
 );
 
-vec2 map(vec2 value, vec2 min1, vec2 max1, vec2 min2, vec2 max2)
-{
-  return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
-}
+const mat3 rgb2yuv = mat3
+(
+    0.299, 		0.587, 		0.114,
+    -0.14713,	-0.28886, 	0.436,
+    0.615, 		-0.51499, 	-0.10001
+);
 
-float map(float value, float min1, float max1, float min2, float max2)
+vec2 map(vec2 value, vec2 min1, vec2 max1, vec2 min2, vec2 max2)
 {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
 float luminance(vec3 color)
 {
-	return color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+	return dot(color, vec3(0.299, 0.587, 0.114));
+}
+
+vec3 texel(sampler2D sampler, vec2 pos, vec2 resolution)
+{
+    return pow(texture(sampler, pos / resolution).rgb, vec3(gamma)) * 1.1;
+}
+
+vec3 average(sampler2D sampler, vec2 pos, vec2 resolution)
+{
+    vec3 col = vec3(0);
+    
+    if(filterSize <= 0)
+    {
+        col = texel(sampler, pos, resolution);
+    }
+    else
+    {
+        for(int y = -filterSize; y <= filterSize; y++)
+        {
+            for(int x = -filterSize; x <= filterSize; x++)
+            {
+                col += texel(sampler, pos + vec2(x, y), resolution);
+            }
+        }
+    }
+    
+    return col / float((2 * filterSize + 1) * (2 * filterSize + 1));
+}
+
+float sobel(sampler2D sampler, vec2 pos, vec2 resolution)
+{
+    float gx = luminance
+        (
+            -1.0 * average(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
+            -2.0 * average(sampler, pos + vec2(-1.0,  0.0) * offset, resolution) +
+            -1.0 * average(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
+             1.0 * average(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
+             2.0 * average(sampler, pos + vec2( 1.0,  0.0) * offset, resolution) +
+             1.0 * average(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
+        );
+    float gy = luminance
+        (
+            -1.0 * average(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
+            -2.0 * average(sampler, pos + vec2( 0.0, -1.0) * offset, resolution) +
+            -1.0 * average(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
+             1.0 * average(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
+             2.0 * average(sampler, pos + vec2( 0.0,  1.0) * offset, resolution) +
+             1.0 * average(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
+        );
+    return sqrt(gx * gx + gy * gy);
 }
 
 float squaredDistance(vec3 point1, vec3 point2)
@@ -50,7 +107,7 @@ float squaredDistance(vec3 point1, vec3 point2)
 void quantize(inout vec3 color)
 {
 	vec3 closest = vec3(0.0, 0.0, 0.0);
-	float minDist = 2.0;
+	float minDist = 999.0;
 
 	for(int i = 0; i < count; i++)
 	{
@@ -92,8 +149,12 @@ void main()
 	vec2 pos = fract(view * grid);					// Multiply cells count
 	vec2 cell = floor(view * grid) / grid;			// Current cell coord
 	vec3 clr = texture2D(mainTex, cell).rgb * mainColor;
+	clr = floor(clr * shades) / shades;    
+    float t = sobel(mainTex, cell * u_resolution, u_resolution);
+    clr = mix(clr, vec3(0), smoothstep(treshold - 0.15, treshold + 0.15, t));
 	ditherize(clr, floor(view * grid));
 	vec3 sqr = show ? square(clr, pos) : clr;
+	sqr = pow(sqr, vec3(1.0 / gamma));
 	gl_FragColor = vec4(sqr, 1.0);
 
 	if(show)

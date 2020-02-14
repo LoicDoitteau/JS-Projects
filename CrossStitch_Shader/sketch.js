@@ -6,7 +6,7 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let canvas, file, colorPicker, resolutionSliderX, resolutionSliderY, biasSlider, infoCheckbox, sizeLabel;
+let canvas, file, colorPicker, resolutionSliderX, resolutionSliderY, biasSlider, infoCheckbox, sizeLabel, gammaSlider, tresholdSlider, shadesSlider, offsetSlider, filterSlider;
 
 let scale, offset, isMoving, rect, x, y;
 
@@ -49,6 +49,11 @@ function init(vertexShader, fragmentShader) {
   biasSlider = document.getElementById("bias-range");
   infoCheckbox = document.getElementById("checkbox");
   sizeLabel = document.getElementById("size");
+  gammaSlider = document.getElementById("gamma-range");
+  tresholdSlider = document.getElementById("treshold-range");
+  shadesSlider = document.getElementById("shades-range");
+  offsetSlider = document.getElementById("offset-range");
+  filterSlider = document.getElementById("filter-range");
 
   uniforms = {
     u_time: { value: 1.0 },
@@ -62,7 +67,12 @@ function init(vertexShader, fragmentShader) {
     palette: { value : new THREE.Texture() },
     count: { value : 0 },
     bias: { value : 1.0 },
-    viewPort: { value: new THREE.Vector4() }
+    viewPort: { value: new THREE.Vector4() },
+    filterSize: { value : 0 },
+    offset: { value : 0.0 },
+    gamma: { value : 1.0 },
+    treshold: { value : 1.0 },
+    shades: { value : 255.0 }
   };
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
@@ -84,6 +94,11 @@ function animate(timestamp) {
   onColorPicked();
   onResolutionChanged();
   onBiasChanged();
+  onGammaChanged();
+  onTresholdChanged();
+  onShadesChanged();
+  onOffsetChanged();
+  onFilterChanged();
   uniforms.u_time.value = timestamp / 1000;
   renderer.render(scene, camera);
 }
@@ -105,6 +120,21 @@ function addEventsListeners() {
 
   onBiasChanged();
   biasSlider.addEventListener("change", onBiasChanged);
+
+  onGammaChanged();
+  gammaSlider.addEventListener("change", onGammaChanged);
+
+  onTresholdChanged();
+  tresholdSlider.addEventListener("change", onTresholdChanged);
+
+  onShadesChanged();
+  shadesSlider.addEventListener("change", onShadesChanged);
+
+  onOffsetChanged();
+  offsetSlider.addEventListener("change", onOffsetChanged);
+
+  onFilterChanged();
+  filterSlider.addEventListener("change", onFilterChanged);
 
   onInfoToggled();
   infoCheckbox.addEventListener("change", onInfoToggled);
@@ -143,7 +173,32 @@ function onResolutionChanged() {
 
 function onBiasChanged() {
   const bias = biasSlider.valueAsNumber;
-  uniforms.bias.value = bias / 100;
+  uniforms.bias.value = bias;
+}
+
+function onGammaChanged() {
+  const gamma = gammaSlider.valueAsNumber;
+  uniforms.gamma.value = gamma;
+}
+
+function onTresholdChanged() {
+  const treshold = tresholdSlider.valueAsNumber;
+  uniforms.treshold.value = treshold;
+}
+
+function onShadesChanged() {
+  const shades = shadesSlider.valueAsNumber;
+  uniforms.shades.value = shades;
+}
+
+function onOffsetChanged() {
+  const offset = offsetSlider.valueAsNumber;
+  uniforms.offset.value = offset;
+}
+
+function onFilterChanged() {
+  const filter = filterSlider.valueAsNumber;
+  uniforms.filterSize.value = filter;
 }
 
 function onInfoToggled() {
