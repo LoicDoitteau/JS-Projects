@@ -50,7 +50,36 @@ float luminance(vec3 color)
 
 vec3 texel(sampler2D sampler, vec2 pos, vec2 resolution)
 {
-    return pow(texture(sampler, pos / resolution).rgb, vec3(gamma)) * 1.1;
+    return pow(texture2D(sampler, pos / resolution).rgb, vec3(gamma)) * 1.1;
+}
+
+vec3 paletteAaverage()
+{
+    vec3 sum = vec3(0);
+    
+    for(int i = 0; i < count; i++)
+	{
+		vec2 brush = vec2(float(i) / float(count), 0.0);
+		vec3 plt = texel(palette, vec2(float(i), 0), vec2(float(count), 0));
+        sum += plt;
+    }
+    
+    return sum / float(count);
+}
+
+vec3 paletteDeviation()
+{
+    vec3 sum = vec3(0);
+    vec3 avg = paletteAaverage();
+    
+    for(int i = 0; i < count; i++)
+	{
+		vec2 brush = vec2(float(i) / float(count), 0.0);
+		vec3 plt = texel(palette, vec2(float(i), 0), vec2(float(count), 0));
+        sum += abs(plt - avg);
+    }
+    
+    return sum / float(count);
 }
 
 vec3 average(sampler2D sampler, vec2 pos, vec2 resolution)
@@ -112,8 +141,8 @@ void quantize(inout vec3 color)
 	for(int i = 0; i < count; i++)
 	{
 		vec2 brush = vec2(float(i) / float(count), 0.0);
-		vec4 plt = texture2D(palette, brush);
-		float dist = squaredDistance(color, plt.rgb);
+		vec3 plt = texel(palette, vec2(float(i), 0), vec2(float(count), 0));
+		float dist = squaredDistance(color * rgb2yuv, plt * rgb2yuv);
 		if(dist < minDist) 
 		{
 			minDist = dist;
@@ -128,7 +157,7 @@ void ditherize(inout vec3 color, vec2 position)
 {
 	int index = int(mod(position.x, 8.0)) + int(mod(position.y, 8.0)) * 8;
 	float offset = (float(matrix[index]) + 1.0) / 64.0 - 0.5;
-	color += offset * bias; 
+	color += offset * bias * paletteDeviation(); 
 	quantize(color);
 }
 
