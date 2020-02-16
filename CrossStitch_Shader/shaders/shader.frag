@@ -18,10 +18,13 @@ uniform float offset;
 uniform float gamma;
 uniform float treshold;
 uniform float shades;
+uniform float brightness;
+uniform float saturation;
+uniform float contrast;
 
 const int[] matrix = int[]
 (
-	0,  48, 12, 60, 3,  51, 15, 63,
+    0,  48, 12, 60, 3,  51, 15, 63,
     32, 16, 44, 28, 35, 19, 47, 31,
     8,  56, 4,  52, 11, 59, 7,  55,
     40, 24, 36, 20, 43, 27, 39, 23,
@@ -30,6 +33,26 @@ const int[] matrix = int[]
     10, 58, 6,  54, 9,  57, 5,  53,
     42, 26, 38, 22, 41, 25, 37, 21
 );
+const int matrixSize = 8;
+const int matrixLength = 64;
+
+// const int[] matrix = int[]
+// (
+//     0,  2,
+//     3,  1
+// );
+// const int matrixSize = 2;
+// const int matrixLength = 4;
+
+// const int[] matrix = int[]
+// (
+//     0,  8,  2,  10,
+//     12, 4,  14, 6,
+//     3,  11, 1,  9,
+//     15, 7,  13, 5
+// );
+// const int matrixSize = 4;
+// const int matrixLength = 16;
 
 const mat3 rgb2yuv = mat3
 (
@@ -37,6 +60,23 @@ const mat3 rgb2yuv = mat3
     -0.14713,	-0.28886, 	0.436,
     0.615, 		-0.51499, 	-0.10001
 );
+
+vec3 rgb2hsv(vec3 c)
+{
+    vec4 k = vec4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+    vec4 p = c.g < c.b ? vec4(c.bg, k.wz) : vec4(c.gb, k.xy);
+    vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 vec2 map(vec2 value, vec2 min1, vec2 max1, vec2 min2, vec2 max2)
 {
@@ -50,7 +90,7 @@ float luminance(vec3 color)
 
 vec3 texel(sampler2D sampler, vec2 pos, vec2 resolution)
 {
-    return pow(texture2D(sampler, pos / resolution).rgb, vec3(gamma)) * 1.1;
+    return pow(texture2D(sampler, pos / resolution).rgb, vec3(gamma));
 }
 
 vec3 paletteAaverage()
@@ -108,21 +148,21 @@ float sobel(sampler2D sampler, vec2 pos, vec2 resolution)
 {
     float gx = luminance
         (
-            -1.0 * average(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
-            -2.0 * average(sampler, pos + vec2(-1.0,  0.0) * offset, resolution) +
-            -1.0 * average(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
-             1.0 * average(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
-             2.0 * average(sampler, pos + vec2( 1.0,  0.0) * offset, resolution) +
-             1.0 * average(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
+            -1.0 * texel(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
+            -2.0 * texel(sampler, pos + vec2(-1.0,  0.0) * offset, resolution) +
+            -1.0 * texel(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
+             1.0 * texel(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
+             2.0 * texel(sampler, pos + vec2( 1.0,  0.0) * offset, resolution) +
+             1.0 * texel(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
         );
     float gy = luminance
         (
-            -1.0 * average(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
-            -2.0 * average(sampler, pos + vec2( 0.0, -1.0) * offset, resolution) +
-            -1.0 * average(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
-             1.0 * average(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
-             2.0 * average(sampler, pos + vec2( 0.0,  1.0) * offset, resolution) +
-             1.0 * average(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
+            -1.0 * texel(sampler, pos + vec2(-1.0, -1.0) * offset, resolution) +
+            -2.0 * texel(sampler, pos + vec2( 0.0, -1.0) * offset, resolution) +
+            -1.0 * texel(sampler, pos + vec2( 1.0, -1.0) * offset, resolution) +
+             1.0 * texel(sampler, pos + vec2(-1.0,  1.0) * offset, resolution) +
+             2.0 * texel(sampler, pos + vec2( 0.0,  1.0) * offset, resolution) +
+             1.0 * texel(sampler, pos + vec2( 1.0,  1.0) * offset, resolution)
         );
     return sqrt(gx * gx + gy * gy);
 }
@@ -155,10 +195,27 @@ void quantize(inout vec3 color)
 
 void ditherize(inout vec3 color, vec2 position)
 {
-	int index = int(mod(position.x, 8.0)) + int(mod(position.y, 8.0)) * 8;
-	float offset = (float(matrix[index]) + 1.0) / 64.0 - 0.5;
-	color += offset * bias * paletteDeviation(); 
+	int index = int(mod(position.x, float(matrixSize))) + int(mod(position.y, float(matrixSize))) * matrixSize;
+	float offset = (float(matrix[index]) + 1.0) / float(matrixLength) - 0.5;
+	color += offset * bias;// * paletteDeviation(); 
 	quantize(color);
+}
+
+void _brighten(inout vec3 color)
+{
+    color = clamp(color + brightness, 0.0, 1.0);
+}
+
+void _saturate(inout vec3 color)
+{
+    vec3 grey = vec3(luminance(color));
+    color = clamp(mix(grey, color, saturation), 0.0, 1.0);
+}
+
+void _contrast(inout vec3 color)
+{
+    float t =  (1.0 - contrast) * 0.5;
+    color = clamp(color * contrast + t, 0.0, 1.0);
 }
 
 vec3 square(vec3 color, vec2 position)
@@ -177,8 +234,11 @@ void main()
 	vec2 grid = vec2(cols, rows);
 	vec2 pos = fract(view * grid);					// Multiply cells count
 	vec2 cell = floor(view * grid) / grid;			// Current cell coord
-	vec3 clr = texture2D(mainTex, cell).rgb * mainColor;
-	clr = floor(clr * shades) / shades;    
+    vec3 clr = average(mainTex, cell * u_resolution, u_resolution) * mainColor;
+	clr = hsv2rgb(floor(rgb2hsv(clr) * shades) / shades);    
+    _brighten(clr);
+    _contrast(clr);
+    _saturate(clr);
     float t = sobel(mainTex, cell * u_resolution, u_resolution);
     clr = mix(clr, vec3(0), smoothstep(treshold - 0.15, treshold + 0.15, t));
 	ditherize(clr, floor(view * grid));

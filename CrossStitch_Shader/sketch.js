@@ -6,7 +6,11 @@ const IMAGE_URI = "images/cat.jpg";
 
 let camera, scene, renderer;
 let uniforms;
-let canvas, file, colorPicker, resolutionSliderX, resolutionSliderY, biasSlider, infoCheckbox, sizeLabel, gammaSlider, tresholdSlider, shadesSlider, offsetSlider, filterSlider;
+let canvas, file, colorPicker,
+resolutionSliderX, resolutionSliderY, biasSlider,
+infoCheckbox, sizeLabel, gammaSlider, tresholdSlider,
+shadesSlider, offsetSlider, filterSlider,
+brightnessSlider, saturationSlider, contrastSlider;
 
 let scale, offset, isMoving, rect, x, y;
 
@@ -54,6 +58,9 @@ function init(vertexShader, fragmentShader) {
   shadesSlider = document.getElementById("shades-range");
   offsetSlider = document.getElementById("offset-range");
   filterSlider = document.getElementById("filter-range");
+  brightnessSlider = document.getElementById("brightness-range");
+  saturationSlider = document.getElementById("saturation-range");
+  contrastSlider = document.getElementById("contrast-range");
 
   uniforms = {
     u_time: { value: 1.0 },
@@ -72,7 +79,10 @@ function init(vertexShader, fragmentShader) {
     offset: { value : 0.0 },
     gamma: { value : 1.0 },
     treshold: { value : 1.0 },
-    shades: { value : 255.0 }
+    shades: { value : 255.0 },
+    brightness: { value : 0.0 },
+    saturation: { value : 1.0 },
+    contrast: { value : 1.0 }
   };
 
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
@@ -99,6 +109,9 @@ function animate(timestamp) {
   onShadesChanged();
   onOffsetChanged();
   onFilterChanged();
+  onBrightnessChanged();
+  onSaturationChanged();
+  onContrastChanged();
   uniforms.u_time.value = timestamp / 1000;
   renderer.render(scene, camera);
 }
@@ -135,6 +148,15 @@ function addEventsListeners() {
 
   onFilterChanged();
   filterSlider.addEventListener("change", onFilterChanged);
+
+  onBrightnessChanged();
+  brightnessSlider.addEventListener("change", onBrightnessChanged);
+
+  onContrastChanged();
+  contrastSlider.addEventListener("change", onContrastChanged);
+
+  onSaturationChanged();
+  saturationSlider.addEventListener("change", onSaturationChanged);
 
   onInfoToggled();
   infoCheckbox.addEventListener("change", onInfoToggled);
@@ -199,6 +221,21 @@ function onOffsetChanged() {
 function onFilterChanged() {
   const filter = filterSlider.valueAsNumber;
   uniforms.filterSize.value = filter;
+}
+
+function onBrightnessChanged() {
+  const brightness = brightnessSlider.valueAsNumber;
+  uniforms.brightness.value = brightness;
+}
+
+function onSaturationChanged() {
+  const saturation = saturationSlider.valueAsNumber;
+  uniforms.saturation.value = saturation;
+}
+
+function onContrastChanged() {
+  const contrast = contrastSlider.valueAsNumber;
+  uniforms.contrast.value = contrast;
 }
 
 function onInfoToggled() {
