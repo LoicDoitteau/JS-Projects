@@ -58,6 +58,7 @@ function mousePressed() {
     
                 
                 for (const p of drawingShape) {
+                    if (p == p1 || p == p2) continue;
                     const v = sub(project(p, p1, p2), p);
                     mirrorShape.push({x : p.x + v.x * 2, y : p.y + v.y * 2});
                 };
@@ -92,8 +93,8 @@ const project = (p, p1, p2) =>
     const v2 = sub(p2, p1);
     const d1 = dot(v1, v2);
     const d2 = dot(v2, v2);
-    const d = d1 / d2;
-    return {x : p1.x + d * v2.x, y : p1.y + d * v2.y};
+    const t = d1 / d2;
+    return {x : p1.x + t * v2.x, y : p1.y + t * v2.y};
 }
 
 function updateShapes() {
@@ -130,7 +131,7 @@ function drawShapes() {
 
             stroke(200, 52, 52);
             line(p1.x, p1.y, p2.x, p2.y);
-            stroke(200);
+            stroke(lerp(200 , 52, (sin(frameCount * 0.1) * 0.5 + 0.5)));
             
             beginShape();
             vertex(p1.x, p1.y);
@@ -142,6 +143,7 @@ function drawShapes() {
             vertex(p2.x, p2.y);
             endShape();
 
+            stroke(200);
             drawingContext.setLineDash([]);
         }
     }
